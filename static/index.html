@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="/static/ele.css">
+</head>
+<body>
+<div id="app">
+    <el-menu default-active="1" class="el-menu-demo" mode="horizontal">
+        <el-menu-item index="1">Magnet Subscriber</el-menu-item>
+    </el-menu>
+    <el-form :inline="true">
+        <el-form-item label="New Subscriber" style="margin-top: 22px">
+            <el-input v-model="new_keyword" placeholder="Keyword"></el-input>
+        </el-form-item>
+        <el-form-item style="margin-top: 22px">
+            <el-button type="primary" @click="onSubmit">Add</el-button>
+        </el-form-item>
+    </el-form>
+    <el-collapse accordion>
+        <el-collapse-item v-for="task in tasks">
+            <template slot="title">
+                <el-tag type="success" size="small">{{task.gmt_create}}</el-tag>
+                {{task.keyword}}
+                <i class="el-icon-loading" v-if="!task.magnet"></i>
+            </template>
+            <el-button type="success" icon="el-icon-success">{{task.nodes.length}} Nodes</el-button>
+            <a :href="task.magnet" v-if="task.magnet">
+                <el-button type="warning" icon="el-icon-download">Magnet</el-button>
+            </a>
+            <el-button type="primary" icon="el-icon-search" v-on:click="search(task.keyword)">Search</el-button>
+            <el-button type="danger" icon="el-icon-delete" v-on:click="deleteTask(task.keyword)">Delete</el-button>
+            <el-table :data="task.nodes">
+                <el-table-column prop="sup" label="#" width="50"></el-table-column>
+                <el-table-column prop="title" label="Title"></el-table-column>
+                <el-table-column label="Attr" :formatter="attrFormatter"></el-table-column>
+                <el-table-column label="Detail">
+                    <template slot-scope="scope">
+                        <a :href="scope.row.detail" target="_blank">
+                            <el-button size="mini" round>Detail</el-button>
+                        </a>
+                        <a :href="scope.row.magnet">
+                            <el-button size="mini" round>Magnet</el-button>
+                        </a>
+                        <el-button size="mini" round v-on:click="mark(scope.row.keyword, scope.row.magnet)"
+                                   :type="scope.row.magnet == task.magnet ? 'warning' : ''">
+                            <i class="el-icon-check" v-if="scope.row.magnet == task.magnet"></i>
+                            Mark
+                        </el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-collapse-item>
+    </el-collapse>
+</div>
+</body>
+<!-- 先引入 Vue -->
+<script src="/static/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="/static/ele.js"></script>
+
+<script src="/static/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                tasks: [],
+                visible: false,
+                new_keyword : ''
+            }
+        },
+        methods: {
+            getTasks: function () {
+                let that = this;
+                axios.get('/ajax/task').then(function (response) {
+                    console.log(response.data);
+                    that.$data.tasks = response.data
+                }).catch(function (error) {
+                    console.log(error)
+                })
+            },
+            attrFormatter: function (r, c) {
+                let attrs = r.attr.split("|");
+                return attrs.join("\n");
+            },
+            search: function (keyword) {
+                let that = this;
+                for (let i = 0; i < that.tasks.length; i++) {
+                    if (that.tasks[i].keyword === keyword) {
+                        that.tasks[i].nodes = []
+                    }
+                }
+                axios.put('/ajax/task/' + keyword, {
+                    magnet: ''
+                }).then(function (response) {
+                    console.log(response.data);
+                    that.getTasks()
+                }).catch(function (error) {
+                    console.log(error)
+                });
+            },
+            mark: function (keyword, magnet) {
+                let that = this;
+                axios.put('/ajax/task/' + keyword, {
+                    magnet: magnet
+                }).then(function (response) {
+                    console.log(response.data);
+                    that.getTasks()
+                }).catch(function (error) {
+                    console.log(error)
+                });
+            },
+            deleteTask: function(keyword){
+                let that = this;
+                axios.delete('/ajax/task/' + keyword, {
+                    magnet: ''
+                }).then(function (response) {
+                    console.log(response.data);
+                    that.getTasks()
+                }).catch(function (error) {
+                    console.log(error)
+                });
+            },
+            onSubmit :  function(){
+                let that = this;
+                axios.put('/ajax/task/' + that.new_keyword, {
+                    magnet: ''
+                }).then(function (response) {
+                    console.log(response.data);
+                    that.getTasks()
+                }).catch(function (error) {
+                    console.log(error)
+                });
+            }
+        },
+        mounted: function () {
+            this.getTasks();
+        }
+    })
+</script>
+</html>
