@@ -55,4 +55,4 @@ api.add_resource(Task, '/ajax/task', '/ajax/task/<name>', '/ajax/task/<offset>/<
 
 if __name__ == '__main__':
     # app.run(debug=True, host='0.0.0.0')
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=80, threaded=True)
