@@ -11,3 +11,29 @@ sudo pip install flask
 sudo pip install flask-restful
 sudo python web.py
 ```
+
+#init database
+```
+create table task
+(
+	keyword,
+	magnet,
+	gmt_create,
+	gmt_modified,
+	delete_mark
+)
+;
+
+create table torr
+(
+	keyword,
+	sup,
+	title,
+	detail,
+	attr,
+	magnet,
+	gmt_create,
+	delete_mark
+)
+;
+```
