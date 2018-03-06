@@ -31,7 +31,7 @@ def github_callback(env='prod'):
     print('env', env)
     code = request.args['code']
     if env != 'prod':
-        return render_template('redirect.html', datas={'code':code})
+        return render_template('redirect.html', code=code)
     header = {'Accept': 'application/json'}
     payload = {'client_id': conf['github_client_id'], 'client_secret': conf['github_client_secret'], 'code': code}
     r = requests.post('https://github.com/login/oauth/access_token', headers=header, data=payload)
