@@ -1,8 +1,10 @@
-from flask import Flask, url_for, redirect, request, render_template
+from flask import Flask, url_for, redirect, request, render_template, session
 from flask.ext import restful
 import database
 import requestnode
 import json
+from setting import conf
+import requests
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -23,9 +25,19 @@ def search(name):
     return render_template('list.html', datas=datas)
 
 
-class HelloWorld(restful.Resource):
-    def get(self):
-        return {'hello': 'world'}
+@app.route('/user/callback')
+@app.route('/user/callback/<env>')
+def github_callback(env='prod'):
+    code = request.args['code']
+    if env != 'prod':
+        return redirect('http://127.0.0.1:5000/user/callback?code='+code)
+    header = {'Accept': 'application/json'}
+    payload = {'client_id': conf['github_client_id'], 'client_secret': conf['github_client_secret'], 'code': code}
+    r = requests.post('https://github.com/login/oauth/access_token', headers=header, data=payload)
+    r = requests.get('https://api.github.com/user', headers={'Authorization': 'token '+r.json()['access_token']})
+    data = r.json()
+    session['userName'] = data['login']
+    return data['login']
 
 
 class Task(restful.Resource):
@@ -54,5 +66,5 @@ class Task(restful.Resource):
 api.add_resource(Task, '/ajax/task', '/ajax/task/<name>', '/ajax/task/<offset>/<count>')
 
 if __name__ == '__main__':
-    # app.run(debug=True, host='0.0.0.0')
-    app.run(host='0.0.0.0', port=5000, threaded=True)
+    app.secret_key = conf['session_key']
+    app.run(debug=conf['debug'], host='0.0.0.0', threaded=True)
