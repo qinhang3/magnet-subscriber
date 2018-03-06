@@ -43,7 +43,7 @@ def add_task(username, name, magnet=''):
                            ' and user_name = ?', (magnet, get_time(), name, username))
         print(result.rowcount)
         if result.rowcount == 0:
-            c.execute("INSERT INTO task values(?, ?, ?, ?, ?)", (name, '', get_time(), get_time(), 0))
+            c.execute("INSERT INTO task values(?, ?, ?, ?, ?, ?)", (name, '', get_time(), get_time(), 0, username))
             conn.commit()
             return "inserted."
         else:
