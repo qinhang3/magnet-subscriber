@@ -1,4 +1,4 @@
-from flask import Flask, url_for, redirect, request, render_template, session
+from flask import Flask, url_for, redirect, request, render_template, session, make_response
 from flask.ext import restful
 import database
 import requestnode
@@ -37,13 +37,23 @@ def github_callback(env='prod'):
     r = requests.post('https://github.com/login/oauth/access_token', headers=header, data=payload)
     r = requests.get('https://api.github.com/user', headers={'Authorization': 'token '+r.json()['access_token']})
     data = r.json()
+    print data
     session['userName'] = data['login']
-    return data['login']
+    return redirect('/')
+
+
+@app.route('/user/logout')
+def logout():
+    session['userName'] = ''
+    return session['userName']
 
 
 class Task(restful.Resource):
     def get(self, offset=0, count=10):
-        data = database.get_tasks(offset, count)
+        if not session.has_key('userName') or len(session['userName']) == 0:
+            resp = make_response("require login", 403)
+            return resp
+        data = database.get_tasks(session['userName'], offset, count)
         for item in data:
             nodes = database.get_nodes(item['keyword'])
             for node in nodes:
@@ -54,14 +64,14 @@ class Task(restful.Resource):
     def put(self, name):
         magnet = json.loads(request.data)['magnet']
         if not magnet:
-            database.add_task(name)
+            database.add_task(session['userName'], name)
             datas = requestnode.work('http://cilifanhao.org/q/' + name + '/1/4/0.html', 10)
             database.save_nodes(datas, name)
         else:
-            database.add_task(name, magnet)
+            database.add_task(session['userName'], name, magnet)
 
     def delete(self, name):
-        database.delete_task(name)
+        database.delete_task(session['userName'], name)
 
 
 api.add_resource(Task, '/ajax/task', '/ajax/task/<name>', '/ajax/task/<offset>/<count>')

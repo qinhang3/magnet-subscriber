@@ -35,11 +35,12 @@ def get_time():
     return "%d-%02d-%02d %02d:%02d:%02d" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour + 8, t.tm_min, t.tm_sec)
 
 
-def add_task(name, magnet=''):
+def add_task(username, name, magnet=''):
     conn = sqlite3.connect('example.db')
     try:
         c = conn.cursor()
-        result = c.execute('update task set magnet = ?, gmt_modified = ?,delete_mark = 0 where keyword = ?', (magnet, get_time(), name))
+        result = c.execute('update task set magnet = ?, gmt_modified = ?,delete_mark = 0 where keyword = ?'
+                           ' and user_name = ?', (magnet, get_time(), name, username))
         print(result.rowcount)
         if result.rowcount == 0:
             c.execute("INSERT INTO task values(?, ?, ?, ?, ?)", (name, '', get_time(), get_time(), 0))
@@ -52,11 +53,11 @@ def add_task(name, magnet=''):
         conn.close()
 
 
-def get_tasks(offset=0, count=10):
+def get_tasks(username, offset=0, count=100):
     conn = sqlite3.connect('example.db')
     try:
         c = conn.cursor()
-        c.execute("select * from task where delete_mark = 0 order by gmt_create desc limit ?, ?", (offset, count))
+        c.execute("select * from task where delete_mark = 0 and user_name = ? order by gmt_create desc limit ?, ?", (username, offset, count))
         datas = c.fetchall()
         list = []
         for data in datas:
@@ -66,11 +67,11 @@ def get_tasks(offset=0, count=10):
         conn.close()
 
 
-def delete_task(name):
+def delete_task(username, name):
     conn = sqlite3.connect('example.db')
     try:
         c = conn.cursor()
-        c.execute("update task set delete_mark = 1 where keyword = ?", (name, ))
+        c.execute("update task set delete_mark = 1 where keyword = ? and user_name = ?", (name, username))
         conn.commit()
     finally:
         conn.close()
