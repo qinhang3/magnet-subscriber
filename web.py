@@ -67,4 +67,4 @@ api.add_resource(Task, '/ajax/task', '/ajax/task/<name>', '/ajax/task/<offset>/<
 
 if __name__ == '__main__':
     app.secret_key = conf['session_key']
-    app.run(debug=conf['debug'], host='0.0.0.0', threaded=True)
+    app.run(debug=conf['debug'] == 'True', host='0.0.0.0', threaded=True)
