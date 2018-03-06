@@ -28,6 +28,7 @@ def search(name):
 @app.route('/user/callback')
 @app.route('/user/callback/<env>')
 def github_callback(env='prod'):
+    print('env', env)
     code = request.args['code']
     if env != 'prod':
         return redirect('http://127.0.0.1:5000/user/callback?code='+code)
