@@ -15,12 +15,12 @@ def index():
 
 @app.route('/test/<name>')
 def test(name=None):
-    return render_template('list.html', datas=requestnode.work('http://cilifanhao.org/q/' + name + '/1/4/0.html', 10))
+    return render_template('list.html', datas=requestnode.work('http://cilifanhao.cc/q/' + name + '/1/4/0.html', 10))
 
 
 @app.route('/search/<name>')
 def search(name):
-    datas = requestnode.work('http://cilifanhao.org/q/' + name + '/1/4/0.html', 10)
+    datas = requestnode.work('http://cilifanhao.cc/q/' + name + '/1/4/0.html', 10)
     database.save_nodes(datas, name)
     return render_template('list.html', datas=datas)
 
@@ -65,7 +65,7 @@ class Task(restful.Resource):
         magnet = json.loads(request.data)['magnet']
         if not magnet:
             database.add_task(session['userName'], name)
-            datas = requestnode.work('http://cilifanhao.org/q/' + name + '/1/4/0.html', 10)
+            datas = requestnode.work('http://cilifanhao.cc/q/' + name + '/1/4/0.html', 10)
             database.save_nodes(datas, name)
         else:
             database.add_task(session['userName'], name, magnet)
