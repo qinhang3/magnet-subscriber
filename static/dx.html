@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+
+</head>
+
+<body>
+<div id="app">
+    <row>
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <th>时间</th>
+                        <th>代码</th>
+                        <th>名称</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in items">
+                            <td>{{ item.time }}</td>
+                            <td>{{ item.code }}</td>
+                            <td>{{ item.name }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </row>
+</div>
+</body>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!-- 先引入 Vue -->
+<script src="/static/vue.js"></script>
+<script src="/static/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                items: []
+            }
+        },
+        methods: {
+            getItems: function () {
+                let that = this;
+                axios.get('/dx/get').then(function (response) {
+                    console.log(response.data);
+                    that.items = response.data
+                }).catch(function (error) {
+                    console.log(error);
+                })
+            },
+        },
+        mounted: function () {
+            that = this;
+            axios.interceptors.response.use(function (response) {
+                return response;
+            }, function (error) {
+                if (error.response.status === 403) {
+                    that.login();
+                }
+                return Promise.reject(error);
+            });
+            this.getItems();
+        }
+    })
+</script>
+</html>

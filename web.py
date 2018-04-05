@@ -9,9 +9,27 @@ import requests
 app = Flask(__name__)
 api = restful.Api(app)
 
+
 @app.route('/')
 def index():
     return redirect(url_for('static', filename='index.html'))
+
+@app.route('/dx')
+def dx():
+    return redirect(url_for('static', filename='dx.html'))
+
+
+@app.route('/dx/get')
+def get_dx():
+    return json.dumps(database.get_dx())
+
+
+@app.route('/dx/save', methods=['POST'])
+def save_dx():
+    d = json.loads(request.data)
+    database.save_dx(d['time'], d['data'])
+    return "save ok"
+
 
 @app.route('/test/<name>')
 def test(name=None):
