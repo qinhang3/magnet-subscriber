@@ -8,8 +8,8 @@ def save_dx(time, data):
         c = conn.cursor()
         c.execute('DELETE  FROM dx WHERE gmt_create = ?', (time,))
         for d in data:
-            para = (time, 0, d['name'], d['code'])
-            c.execute('INSERT INTO dx VALUES (?,?,?,?)', para)
+            para = (time, 0, d['name'], d['code'], d['type'])
+            c.execute('INSERT INTO dx VALUES (?,?,?,?,?)', para)
         conn.commit()
     finally:
         conn.close()
@@ -21,7 +21,7 @@ def get_dx():
         c = conn.cursor()
         c.execute('SELECT * FROM dx WHERE delete_mark = 0 ORDER BY gmt_create DESC')
         datas = c.fetchall()
-        return [{'time': node[0], 'name': node[2], 'code': node[3]} for node in datas]
+        return [{'time': node[0], 'name': node[2], 'code': node[3], 'type': node[4]} for node in datas]
     finally:
         conn.close()
 

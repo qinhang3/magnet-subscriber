@@ -16,12 +16,15 @@
                         <th>时间</th>
                         <th>代码</th>
                         <th>名称</th>
+                        <th>入选逻辑</th>
                     </thead>
                     <tbody>
                         <tr v-for="item in items">
                             <td>{{ item.time }}</td>
                             <td>{{ item.code }}</td>
                             <td>{{ item.name }}</td>
+                            <td v-if="!item.type || item.type === '1'">多头排列</td>
+                            <td v-if="item.type == 2">KDJ(30/60分钟)金叉</td>
                         </tr>
                     </tbody>
                 </table>
